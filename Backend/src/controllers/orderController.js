@@ -1,5 +1,6 @@
 const Order = require('../models/order');
 
+// Place order controller
 exports.placeOrder = async (req, res) => {
   const { productId, quantity } = req.body;
 
@@ -13,6 +14,7 @@ exports.placeOrder = async (req, res) => {
   }
 };
 
+// Get order status controller
 exports.getOrderStatus = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -20,6 +22,25 @@ exports.getOrderStatus = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
     res.status(200).json(order.status);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Admin updates order status
+exports.updateOrderStatus = async (req, res) => {
+  const { status } = req.body;
+
+  try {
+    const order = await Order.findById(req.params.orderId);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.status(200).json({ message: 'Order status updated successfully', order });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
